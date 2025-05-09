@@ -1,0 +1,17 @@
+@startuml HeatingSystemContextDiagram
+!include <C4/C4_Container>
+
+title Контекстная диаграмма системы "Тёплый дом"
+
+Person(user, "Пользователь", "Человек, тёплым домом через интерфейс")
+System(smart_home, "Умный дом", "Монолитное приложение управления отоплением")
+System_Ext(temperature_sensor, "Датчик температуры", "Внешний датчик, измеряющий текущую температуру")
+System_Ext(heating_system, "Система отопления", "Физическая система отопления (котёл/радиаторы/кондиционеры)")
+
+Rel(user, smart_home, "Управляет отоплением\n- Включает/выключает\n- Устанавливает целевую температуру\n- Запрашивает текущую температуру", "HTTP/REST")
+Rel(temperature_sensor, smart_home, "Отправляет данные о температуре", "IoT Protocol/API")
+Rel(smart_home, temperature_sensor, "Запрашивает текущую температуру", "IoT Protocol/API")
+Rel(smart_home, heating_system, "Управляет состоянием\n- Включение/выключение\n- Установка мощности", "IoT Protocol/API")
+Rel(heating_system, smart_home, "Отправляет статус работы", "IoT Protocol/API")
+
+@enduml

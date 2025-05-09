@@ -1,0 +1,34 @@
+@startuml
+!include <C4/C4_Component>
+
+title Scenario Engine: Компонентная диаграмма
+
+Container_Boundary(scenario, "Scenario Engine") {
+    Component(api, "REST API", , "Обработка входящих запросов")
+    Component(controller, "Бизнес логика", , "Обработка внешних воздействий")
+    Component(repo, "State repo", , "CRUD для состояния сценариев")
+}
+
+
+Container(gateway, "API Gateway", "Kong", "Единая точка входа\n* Маршрутизация\n* Лимиты API")
+
+Container(event_bus, "Event Bus", "Apache Kafka", "Центральная шина событий\n* Температура\n* Состояния устройств\n* Команды")
+
+Container(heating, "Heating Module", "Quarkus", "Управление отоплением\n* Термостаты\n* Котлы")
+Container(lighting, "Lighting Module", "Node.js", "Контроль освещения\n* Выключатели\n")
+Container(security, "Security Module", "Go", "Безопасность\n* Замки\n* Ворота\n* Камеры")
+Container(rules, "Rules Service", "Java", "Хранение правил")
+ContainerDb(db, "MongoDB", "", "Состояние сценариев")
+
+Rel(gateway, api, "Получает управляющие воздействия от пользователя", "HTTP")
+Rel_R(event_bus, controller, "Получает события", "Kafka")
+Rel(api, controller, "Обработка запроса", "HTTP")
+Rel(controller, heating, "Управляет отоплением", "HTTP")
+Rel(controller, lighting, "Управляет освещением", "HTTP")
+Rel(controller, security, "Управляет замками/воротами", "HTTP")
+Rel_R(controller, rules, "Чтение правил", "gRPC")
+Rel_D(controller, repo, "Чтение правил", "gRPC")
+Rel_L(repo, db, "Чтение текущего состояния / обновление состояния сценария", "gRPC")
+
+
+@enduml
