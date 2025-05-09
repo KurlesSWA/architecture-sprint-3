@@ -1,0 +1,21 @@
+@startuml
+!include <C4/C4_Component>
+
+title Heating Module: Компонентная диаграмма
+
+Container_Boundary(heating, "Heating Module") {
+    Component(api, "REST API", , "Обработка входящих запросов")
+    Component(controller, "Controller", , "Маршрутизация запросов к оборудованию")
+}
+
+
+Container(gateway, "API Gateway", "Kong", "Единая точка входа\n* Маршрутизация\n* Лимиты API")
+
+System_Ext(partner_devices, "Устройства партнеров", "Универсальный протокол", "Стандартизированные устройства\n* Датчики\n* Исполнительные механизмы")
+
+Rel(gateway, api, "Получает запросы на управление оборудованием отопления", "HTTP")
+Rel(api, controller, "Обработка запроса", "HTTP")
+Rel_R(controller, partner_devices, "Управляет отоплением", "Универсальный протокол")
+
+
+@enduml

@@ -1,0 +1,60 @@
+@startuml
+!include <C4/C4_Container>
+!include <C4/C4_Context>
+
+title SaaS-экосистема "Умный Дом Плюс"
+
+Person(user, "Пользователь", "Владелец дома")
+
+System_Boundary(saas_platform, "Платформа SaaS") {
+    Container(web_app, "Web-приложение", "React", "Портал 'Умный Дом Плюс'\n* Управление модулями\n* Настройка сценариев\n* Просмотр телеметрии")
+
+    Container_Boundary(core_services, "Ядро системы") {
+        Container(gateway, "API Gateway", "Kong", "Единая точка входа\n* Маршрутизация\n* Лимиты API")
+        Container(auth, "Auth Service", "Keycloak", "Идентификация и RBAC\n* OAuth2/OIDC")
+        Container(event_bus, "Event Bus", "Apache Kafka", "Центральная шина событий\n* Температура\n* Состояния устройств\n* Команды")
+        Container(scenarios, "Scenario Engine", "Kotlin", "Исполнение сценариев\n* If-Then-Else\n* Таймеры")
+        Container(rules, "Rules Service", "Java", "Хранение правил\n* Графический редактор")
+    }
+
+    Container_Boundary(device_modules, "Модули устройств") {
+        Container(heating, "Heating Module", "Quarkus", "Управление отоплением\n* Термостаты\n* Котлы")
+        Container(lighting, "Lighting Module", "Node.js", "Контроль освещения\n* Выключатели\n")
+        Container(security, "Security Module", "Go", "Безопасность\n* Замки\n* Ворота\n* Камеры")
+        Container(camera, "Camera Module", "Python", "Видеонаблюдение\n* Потоки RTSP\n* Детекция")
+    }
+
+    Container_Boundary(analytics, "Аналитика") {
+        ContainerDb(tsdb, "TimeSeries DB", "InfluxDB", "Хранение телеметрии\n* Датчики\n* События")
+        Container(dashboards, "Dashboards", "Grafana", "Визуализация данных\n* Отчёты")
+    }
+}
+
+System_Ext(partner_devices, "Устройства партнеров", "Универсальный протокол", "Стандартизированные устройства\n* Датчики\n* Исполнительные механизмы")
+
+Rel(user, web_app, "Управляет системой", "HTTPS")
+Rel(web_app, gateway, "API-вызовы", "HTTPS")
+Rel(gateway, auth, "Проверка токенов", "gRPC")
+
+Rel_R(gateway, heating, "API вызовы", "REST")
+Rel_R(gateway, lighting, "API вызовы", "REST")
+Rel_R(gateway, security, "API вызовы", "REST")
+
+Rel(heating, event_bus, "Публикует события", "Kafka")
+Rel(lighting, event_bus, "Публикует события", "Kafka")
+Rel(security, event_bus, "Публикует события", "Kafka")
+Rel(event_bus, scenarios, "Доставляет события", "Kafka")
+Rel(scenarios, rules, "Чтение правил", "gRPC")
+
+Rel(heating, partner_devices, "Управление", "Универсальный протокол")
+Rel(lighting, partner_devices, "Управление", "Универсальный протокол")
+Rel(security, partner_devices, "Управление", "Универсальный протокол")
+
+Rel(heating, tsdb, "Метрики", "db protocol")
+Rel(lighting, tsdb, "Метрики", "db protocol")
+Rel(tsdb, dashboards, "Данные для визуализации", "HTTP")
+
+Rel(camera, security, "Детекция событий", "gRPC")
+Rel(scenarios, gateway, "Вызов API по сценариям", "HTTP")
+
+@enduml

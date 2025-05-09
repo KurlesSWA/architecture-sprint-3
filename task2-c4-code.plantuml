@@ -1,0 +1,55 @@
+@startuml
+!include <C4/C4_Component>
+
+title "Движок сценариев - code diagram"
+
+class "Система отопления" as Heating {
+  +id : integer <<PK>>
+  +name : text
+  +isOn : boolean
+  +currentTemperature : double
+  +void turnOn()
+  +void turnOf()
+  +boolean status()
+  +double currentTemperature()
+}
+
+class "Сценарий" as Scenario {
+  +id : integer <<PK>>
+  +name : text
+  +userId : integer <<FK>>
+  +scenarioState : someState
+  +actions : list<ScenarioAction>
+  +void start()
+  +void onSensorValueChanged(int sensorId, boolean value)
+}
+
+class "Датчик" as Sensor {
+  +id : integer <<PK>>
+  +name : text
+  +currentValue : double
+  +double currentValue()
+}
+
+class "Действие сценария" as ScenarioAction {
+  +scenarioId : integer <<FK>>
+  +sensorId : integer <<FK>>
+  +heatingId : integer <<FK>>
+  +order : integer
+  +name : text
+  +actionData : blob
+  +void onSensorValueChanged(int sensorId, boolean value)
+}
+
+' Связи между классами
+
+Scenario "1" -- "n" ScenarioAction : "содержит"
+Sensor "1" -- "n" ScenarioAction : "используется в"
+Heating "1" -- "n" ScenarioAction : "используется в"
+
+legend right
+  **Обозначения**:
+  <<PK>> - Первичный ключ
+  <<FK>> - Внешний ключ
+endlegend
+@enduml

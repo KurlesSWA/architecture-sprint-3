@@ -1,0 +1,66 @@
+@startuml
+
+top to bottom direction
+skinparam {
+  ranksep 100
+  nodesep 50
+  wrapWidth 200
+}
+entity "User" as user  << (U,#FF7700) >> {
+  *Id : integer <<PK>>
+  --
+  Name : TEXT
+}
+
+entity "Heating" as heating << (H,#FF9999) >> {
+  *Id : integer <<PK>>
+  --
+  Name : TEXT
+  IsOn : BOOLEAN
+  UserId : integer <<FK>>
+}
+
+entity "Scenario" as scenario << (S,#99FF99) >> {
+  *Id : integer <<PK>>
+  --
+  Name : TEXT
+  UserId : integer <<FK>>
+}
+
+entity "Sensor" as sensor << (S, #FF7700) >> {
+  *id : integer <<PK>>
+  --
+  Name : TEXT
+  Address : TEXT
+  Protocol : TEXT
+  UserId : integer <<FK>>
+}
+
+entity "ScenarioAction" as scenario_action << (A,#FFCC66) >> {
+  --
+  ScenarioId : integer <<FK>>
+  SensorId : integer <<FK>>
+  HeatingId : integer <<FK>>
+  Order : integer
+  Name : TEXT
+  ActionData : BLOB
+}
+
+entity "Telemetry" as telemetry  << (T,#AA66FF) >> {
+  *Id : integer <<PK>>
+  --
+  SensorId : integer <<FK>>
+  Timestamp : integer
+  Value : REAL
+}
+
+
+user ||-down-o{ heating : Регистрирует системы отопления
+user ||-down-o{ scenario : Создает сценарии
+user ||-down-o{ sensor : Регистрирует датчики
+scenario ||-down-o{ scenario_action : Содержит действия
+heating ||-o{ scenario_action : Используется в
+sensor ||-o{ scenario_action : Используется в
+sensor ||-down-o{ telemetry : Отправляет телеметрию
+
+@enduml
